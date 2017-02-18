@@ -1,0 +1,130 @@
+---
+name: influxdb # By convention lowercase with dashes
+icon_file: resources/icon.png
+label: InfluxDB
+description: InfluxDB and a Firehose Nozzle to send metrics to it
+metadata_version: 1.8                 # Optional, defaults to 1.5
+apply_open_security_group: true         # Apply open security group, default: false
+
+packages:
+- name: routing
+  type: bosh-release
+  path: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.143.0
+- name: loggregator
+  type: bosh-release
+  path: https://bosh.io/d/github.com/cloudfoundry/loggregator?v=65
+- name: influxdb
+  type: bosh-release
+  path: https://bosh.io/d/github.com/vito/influxdb-boshrelease?v=4
+  jobs:
+  - name: influxdb
+    label: InfluxDB
+    templates:
+    - name: metron_agent
+      release: loggregator
+    - name: route_registrar
+      release: routing
+    - name: influxdb
+      release: influxdb
+    memory: 8192
+    ephemeral_disk: 4096
+    persistent_disk: 102400
+    cpu: 2
+    static_ip: 0
+    dynamic_ip: 1
+    single_az_only: true
+    singleton: true
+    properties:
+      influxdb:
+        database: (( .properties.influxdb_nozzle_db_name ))
+        replication: "1"
+        retention: (( .properties.retention ))
+        user: (( .properties.influxdb_nozzle_db_user ))
+        password: (( .properties.influxdb_nozzle_db_password ))
+      nats:
+        machines: (( ..cf.nats.ips ))
+        port: 4222
+        user: (( ..cf.nats.credentials.identity ))
+        password: (( ..cf.nats.credentials.password ))
+      route_registrar:
+        routes:
+        - name: influxdb-admin
+          port: 8083
+          registration_interval: 20s
+          uris:
+          - influxdb-admin.(( ..cf.cloud_controller.system_domain.value ))
+        - name: influxdb
+          port: 8086
+          registration_interval: 20s
+          uris:
+          - influxdb.(( ..cf.cloud_controller.system_domain.value ))
+      loggregator_endpoint:
+        shared_secret: (( ..cf.doppler.shared_secret_credentials.password ))
+      metron_endpoint:
+        shared_secret: (( ..cf.doppler.shared_secret_credentials.password ))
+      metron_agent:
+        deployment: influxdb
+      loggregator:
+        etcd:
+          machines: (( ..cf.etcd_server.ips ))
+- name: influxdb-nozzle
+  type: app
+  label: Influx DB Nozzle
+  manifest:
+    path: resources/influxdb-nozzle-0.0.1.jar
+    env:
+      SPRING_PROFILES_ACTIVE: tile
+  needs_cf_credentials: false
+
+forms:
+- name: database-properties
+  label: Database Config
+  properties:
+  - name: influxdb_nozzle_db_name
+    type: string
+    default: cf_metrics
+    label: Nozzle destination DB name
+    description: The name of the Influx DB to which the nozzle will write its metrics
+  - name: influxdb_nozzle_db_user
+    type: string
+    label: Influx DB User
+  - name: influxdb_nozzle_db_password
+    type: secret
+    label: Influx DB Password
+  - name: retention
+    type: string
+    label: Data Retention Time Span
+    default: "14d"
+- name: nozzle-config
+  label: Nozzle Config
+  properties:
+  - name: influxdb_nozzle_subscription_id
+    type: string
+    default: "influxdb-nozzle"
+    label: Firehose Subscription ID
+    description: ID the Firehose uses to load balance messages between instances. Should be unique from other nozzles
+  - name: influxdb_nozzle_client_id
+    type: string
+    label: Firehose Client ID
+    description: A UAA client with `doppler.firehose` scope used to connect to the Firehose
+  - name: influxdb_nozzle_client_secret
+    type: secret
+    label: Firehose Client Secret
+  - name: influxdb_nozzle_foundation
+    optional: true
+    type: string
+    label: Foundation Tag
+    description: (Optional) If set, all measurements sent to InfluxDB will have a `foundation` tag with this value
+  - name: influxdb_nozzle_batch_size
+    type: integer
+    label: Batch Size
+    default: 500
+    description: A higher number will reduce load on the InfluxDB server but will increase latency in receiving logs
+    constraints:
+        min: 1
+        max: 5000
+  - name: influxdb_nozzle_skip_ssl_validation
+    type: boolean
+    default: false
+    label: Skip SSL Validation for self-signed certificates when connecting to the firehose
+    description: Skip SSL Validation for self-signed certificates when connecting to the firehose
