@@ -1,8 +1,8 @@
 ---
-name: influxdb # By convention lowercase with dashes
+name: ecsteam-influxdb # By convention lowercase with dashes
 icon_file: resources/icon.png
 label: InfluxDB
-description: InfluxDB and a Firehose Nozzle to send metrics to it
+description: Deploys an InfluxDB and a Firehose Nozzle to send metrics to it
 metadata_version: 1.8                 # Optional, defaults to 1.5
 apply_open_security_group: true         # Apply open security group, default: false
 
@@ -17,8 +17,7 @@ packages:
   type: bosh-release
   path: https://bosh.io/d/github.com/vito/influxdb-boshrelease?v=4
   jobs:
-  - name: influxdb
-    label: InfluxDB
+  - name: InfluxDB
     templates:
     - name: metron_agent
       release: loggregator
@@ -67,7 +66,7 @@ packages:
       loggregator:
         etcd:
           machines: (( ..cf.etcd_server.ips ))
-- name: influxdb-nozzle
+- name: nozzle
   type: app
   label: Influx DB Nozzle
   manifest:
