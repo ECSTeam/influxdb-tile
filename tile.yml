@@ -35,11 +35,11 @@ packages:
     singleton: true
     properties:
       influxdb:
-        database: (( .properties.influxdb_nozzle_db_name ))
+        database: (( .properties.influxdb_nozzle_db_name.value ))
         replication: "1"
-        retention: (( .properties.retention ))
-        user: (( .properties.influxdb_nozzle_db_user ))
-        password: (( .properties.influxdb_nozzle_db_password ))
+        retention: (( .properties.retention.value ))
+        user: (( .properties.influxdb_nozzle_db_user.value ))
+        password: (( .properties.influxdb_nozzle_db_password.value ))
       nats:
         machines: (( ..cf.nats.ips ))
         port: 4222
@@ -70,7 +70,7 @@ packages:
   type: app
   label: Influx DB Nozzle
   manifest:
-    path: resources/influxdb-nozzle-0.0.1.jar
+    path: resources/influxdb-nozzle.jar
     env:
       SPRING_PROFILES_ACTIVE: tile
   needs_cf_credentials: false
