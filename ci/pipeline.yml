@@ -55,9 +55,6 @@ jobs:
 
       run:
         path: tile-source/ci/tasks/build-tile.sh
-  - put: version
-    params:
-      bump: patch
   - put: tile-release
     params:
       name: version/number
@@ -65,3 +62,6 @@ jobs:
       tag_prefix: v
       globs:
       - build-output/*.pivotal
+  - put: version
+    params:
+      bump: patch
