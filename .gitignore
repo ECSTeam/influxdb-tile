@@ -1,3 +1,5 @@
 product/
 release/
 *.jar
+tile-history.yml
+resources/*.tgz
