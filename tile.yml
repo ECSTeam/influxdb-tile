@@ -71,6 +71,7 @@ packages:
   label: Influx DB Nozzle
   manifest:
     path: resources/influxdb-nozzle.jar
+    instances: (( .properties.instances.value ))
     env:
       SPRING_PROFILES_ACTIVE: tile
   needs_cf_credentials: false
@@ -117,11 +118,18 @@ forms:
   - name: influxdb_nozzle_batch_size
     type: integer
     label: Batch Size
-    default: 500
+    default: 250
     description: A higher number will reduce load on the InfluxDB server but will increase latency in receiving logs
     constraints:
-        min: 1
-        max: 5000
+      min: 1
+      max: 500
+  - name: instances
+    type: integer
+    label: instances
+    default: 1
+    description: The number of instances of the nozzle to run
+    constraints:
+      min: 1
   - name: influxdb_nozzle_skip_ssl_validation
     type: boolean
     default: false
