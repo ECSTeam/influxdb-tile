@@ -25,10 +25,10 @@ packages:
       release: routing
     - name: influxdb
       release: influxdb
-    memory: 8192
+    memory: 32768
     ephemeral_disk: 4096
     persistent_disk: 102400
-    cpu: 2
+    cpu: 8
     static_ip: 0
     dynamic_ip: 1
     single_az_only: true
@@ -75,6 +75,16 @@ packages:
     env:
       SPRING_PROFILES_ACTIVE: tile
   needs_cf_credentials: false
+
+properties:
+- name: influxdb_nozzle_admin_client_id
+  is_reference: true
+  type: string
+  default: (( ..cf.uaa.admin_client_credentials.identity ))
+- name: influxdb_nozzle_admin_client_secret
+  is_reference: true
+  type: string
+  default: (( ..cf.uaa.admin_client_credentials.password ))
 
 forms:
 - name: database-properties
