@@ -65,3 +65,17 @@ jobs:
   - put: version
     params:
       bump: patch
+- name: bump-minor
+  public: true
+  plan:
+  - get: version
+    params: { bump: minor }
+  - put: version
+    params: { file: version/number }
+- name: bump-major
+  public: true
+  plan:
+  - get: version
+    params: { bump: major }
+  - put: version
+    params: { file: version/number }
