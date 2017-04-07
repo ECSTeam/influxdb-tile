@@ -66,12 +66,13 @@ packages:
       loggregator:
         etcd:
           machines: (( ..cf.etcd_server.ips ))
-- name: nozzle
+- name: influxdb-nozzle
   type: app
   label: Influx DB Nozzle
   manifest:
     path: resources/influxdb-nozzle.jar
     instances: 3
+    buildpack: java_buildpack_offline
     env:
       SPRING_PROFILES_ACTIVE: tile
   needs_cf_credentials: false
@@ -120,6 +121,17 @@ forms:
   - name: influxdb_nozzle_client_secret
     type: secret
     label: Firehose Client Secret
+  # - name: buildpack
+  #   label: Buildpack
+  #   description: The name or URL of the Java Buildpack with which the InfluxDB nozzle will be deployed.
+  #   type: string
+  #   default: java_buildpack_offline
+  # - name: instances
+  #   label: Number of Nozzle instances
+  #   type: integer
+  #   default: 3
+  #   constraints:
+  #     min: 1
   - name: influxdb_nozzle_foundation
     optional: true
     type: string
@@ -129,12 +141,36 @@ forms:
     type: integer
     label: Batch Size
     default: 250
-    description: A higher number will reduce load on the InfluxDB server but will increase latency in receiving logs
+    description: A higher number will reduce load on the InfluxDB server but will increase latency in receiving logs and will increase memory usage in the nozzle.
     constraints:
       min: 1
       max: 500
+  - name: influxdb_nozzle_tag_fields
+    type: multi_select_options
+    label: Fields to Tag
+    description: Selected Firehose event fields will be saved as InfluxDB tags
+    default: ['job','index','ip','unit','delta','deployment']
+    options:
+    - name: job
+      label: Job
+      description: ''
+    - name: index
+      label: Index
+      description: ''
+    - name: ip
+      label: IP Address
+      description: ''
+    - name: deployment
+      label: Source Deployment
+      description: Save the job's BOSH deployment (tile) as an InfluxDB tag
+    - name: tags
+      label: Custom Tags
+    - name: unit
+      label: Unit (Valid for ValueMetrics only)
+    - name: delta
+      label: Delta (Valid for CounterEvents only)
   - name: influxdb_nozzle_skip_ssl_validation
     type: boolean
     default: false
-    label: Skip SSL Validation for self-signed certificates when connecting to the firehose
-    description: Skip SSL Validation for self-signed certificates when connecting to the firehose
+    label: Skip SSL Validation for untrusted certificates when connecting to the firehose
+    description: Skip SSL Validation for untrusted certificates when connecting to the firehose
