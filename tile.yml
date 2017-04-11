@@ -17,7 +17,6 @@ icon_file: resources/icon.png
 label: InfluxDB
 description: Deploys an InfluxDB and a Firehose Nozzle to send metrics to it
 metadata_version: 1.8                 # Optional, defaults to 1.5
-apply_open_security_group: true         # Apply open security group, default: false
 
 packages:
 - name: routing
