@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-name: ecsteam-influxdb 
+name: ecsteam-influxdb
 icon_file: resources/icon.png
 label: InfluxDB
 description: Deploys an InfluxDB and a Firehose Nozzle to send metrics to it
@@ -178,7 +178,7 @@ forms:
     type: multi_select_options
     label: Fields to Tag
     description: Selected Firehose event fields will be saved as InfluxDB tags
-    default: ['job','index','ip','unit','delta','deployment']
+    default: ['job','index','ip','unit','deployment']
     options:
     - name: job
       label: Job
@@ -196,8 +196,6 @@ forms:
       label: Custom Tags
     - name: unit
       label: Unit (Valid for ValueMetrics only)
-    - name: delta
-      label: Delta (Valid for CounterEvents only)
   - name: influxdb_nozzle_skip_ssl_validation
     type: boolean
     default: false
