@@ -84,25 +84,68 @@ packages:
           machines: "(( .properties.metrics_tls_disabled.value ? ..cf.etcd_server.ips : .properties.etcd_machines.parsed_strings ))"
           ca_cert: (( $ops_manager.ca_certificate ))
 - name: influxdb-nozzle
-  type: app
-  label: Influx DB Nozzle
-  manifest:
-    path: resources/influxdb-nozzle.jar
-    instances: 3
-    buildpack: java_buildpack_offline
-    env:
-      SPRING_PROFILES_ACTIVE: tile
-  needs_cf_credentials: false
+  type: bosh-release
+  path: resources/influxdb-nozzle-bosh-release.tgz
+  jobs:
+  - name: deploy_nozzle
+    templates:
+    - name: deploy_nozzle
+      release: influxdb-nozzle
+    lifecycle: errand
+    post_deploy: true
+    label: Deploy Nozzle
+    properties:
+      influxdb:
+        nozzle:
+          admin_client_id: (( ..cf.uaa.admin_client_credentials.identity ))
+          admin_client_secret: (( ..cf.uaa.admin_client_credentials.password ))
+          db_name: (( .properties.influxdb_nozzle_db_name.value ))
+          db_user: (( .properties.influxdb_nozzle_db_user.value ))
+          db_password: (( .properties.influxdb_nozzle_db_password.value ))
+          subscription_id: (( .properties.influxdb_nozzle_subscription_id.value ))
+          client_id: (( .properties.influxdb_nozzle_client_id.value ))
+          client_secret: (( .properties.influxdb_nozzle_client_secret.value ))
+          foundation: (( .properties.influxdb_nozzle_foundation.value ))
+          batch_size: (( .properties.influxdb_nozzle_batch_size.value ))
+          tag_fields: (( .properties.influxdb_nozzle_tag_fields.value ))
+      buildpack: (( .properties.buildpack.value ))
+      instances: (( .properties.instances.value ))
+      security:
+        user: (( .properties.app_credentials.identity ))
+        password: (( .properties.app_credentials.password ))
+      ssl:
+        skip_cert_verify: (( ..cf.ha_proxy.skip_cert_verify.value ))
+      cf:
+        admin_user: (( ..cf.uaa.system_services_credentials.identity ))
+        admin_password: (( ..cf.uaa.system_services_credentials.password ))
+      domain: (( ..cf.cloud_controller.system_domain.value ))
+      app_domains:
+      - (( ..cf.cloud_controller.apps_domain.value ))
+      org: (( .properties.org.value ))
+      space: (( .properties.space.value ))
+  - name: delete_nozzle
+    templates:
+    - name: delete_nozzle
+      release: influxdb-nozzle
+    lifecycle: errand
+    pre_delete: true
+    label: Delete Nozzle
+    properties:
+      security:
+        user: (( .properties.app_credentials.identity ))
+        password: (( .properties.app_credentials.password ))
+      ssl:
+        skip_cert_verify: (( ..cf.ha_proxy.skip_cert_verify.value ))
+      cf:
+        admin_user: (( ..cf.uaa.system_services_credentials.identity ))
+        admin_password: (( ..cf.uaa.system_services_credentials.password ))
+      domain: (( ..cf.cloud_controller.system_domain.value ))
+      app_domains:
+      - (( ..cf.cloud_controller.apps_domain.value ))
+      org: (( .properties.org.value ))
+      space: (( .properties.space.value ))
 
 properties:
-- name: influxdb_nozzle_admin_client_id
-  is_reference: true
-  type: string
-  default: (( ..cf.uaa.admin_client_credentials.identity ))
-- name: influxdb_nozzle_admin_client_secret
-  is_reference: true
-  type: string
-  default: (( ..cf.uaa.admin_client_credentials.password ))
 - name: null_string
   type: string
   default:
@@ -115,6 +158,8 @@ properties:
 - name: false_boolean
   type: boolean
   default: false
+- name: app_credentials
+  type: salted_credentials
 
 forms:
 - name: database-properties
@@ -150,17 +195,16 @@ forms:
   - name: influxdb_nozzle_client_secret
     type: secret
     label: Firehose Client Secret
-  # - name: buildpack
-  #   label: Buildpack
-  #   description: The name or URL of the Java Buildpack with which the InfluxDB nozzle will be deployed.
-  #   type: string
-  #   default: java_buildpack_offline
-  # - name: instances
-  #   label: Number of Nozzle instances
-  #   type: integer
-  #   default: 3
-  #   constraints:
-  #     min: 1
+  - name: buildpack
+    label: Buildpack
+    description: The name or URL of the Java Buildpack with which the InfluxDB nozzle will be deployed.
+    type: string
+  - name: instances
+    label: Number of Nozzle instances
+    type: integer
+    default: 3
+    constraints:
+      min: 1
   - name: influxdb_nozzle_foundation
     optional: true
     type: string
