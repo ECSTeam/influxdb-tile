@@ -128,7 +128,6 @@ packages:
       - (( ..cf.cloud_controller.apps_domain.value ))
       org: (( .properties.org.value ))
       space: (( .properties.space.value ))
-      version: REPLACE_ME_VERSION
   - name: delete_nozzle
     templates:
     - name: delete_nozzle
@@ -251,11 +250,6 @@ forms:
       label: Custom Tags
     - name: unit
       label: Unit (Valid for ValueMetrics only)
-  - name: influxdb_nozzle_skip_ssl_validation
-    type: boolean
-    default: false
-    label: Skip SSL Validation for untrusted certificates when connecting to the firehose
-    description: Skip SSL Validation for untrusted certificates when connecting to the firehose
 - name: metrics
   label: Metrics
   properties:
