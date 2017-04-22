@@ -83,17 +83,22 @@ packages:
           require_ssl: "(( .properties.metrics_tls_disabled.value ? .properties.false_boolean.value : .properties.true_boolean.value ))"
           machines: "(( .properties.metrics_tls_disabled.value ? ..cf.etcd_server.ips : .properties.etcd_machines.parsed_strings ))"
           ca_cert: (( $ops_manager.ca_certificate ))
-- name: influxdb-nozzle
+- name: influxdb-nozzle-bosh-release
   type: bosh-release
   path: resources/influxdb-nozzle-bosh-release.tgz
   jobs:
   - name: deploy_nozzle
     templates:
     - name: deploy_nozzle
-      release: influxdb-nozzle
+      release: influxdb-nozzle-bosh-release
     lifecycle: errand
     post_deploy: true
     label: Deploy Nozzle
+    memory: 2048
+    ephemeral_disk: 4096
+    cpu: 1
+    static_ip: 0
+    dynamic_ip: 1
     properties:
       influxdb:
         nozzle:
@@ -126,10 +131,15 @@ packages:
   - name: delete_nozzle
     templates:
     - name: delete_nozzle
-      release: influxdb-nozzle
+      release: influxdb-nozzle-bosh-release
     lifecycle: errand
     pre_delete: true
     label: Delete Nozzle
+    memory: 2048
+    ephemeral_disk: 4096
+    cpu: 1
+    static_ip: 0
+    dynamic_ip: 1
     properties:
       security:
         user: (( .properties.app_credentials.identity ))
