@@ -3,3 +3,4 @@ release/
 *.jar
 tile-history.yml
 resources/*.tgz
+.DS_Store
