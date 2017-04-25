@@ -25,6 +25,9 @@ packages:
 - name: loggregator
   type: bosh-release
   path: https://bosh.io/d/github.com/cloudfoundry/loggregator?v=65
+- name: consul
+  type: bosh-release
+  path: https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=152
 - name: influxdb
   type: bosh-release
   path: https://bosh.io/d/github.com/vito/influxdb-boshrelease?v=4
@@ -83,6 +86,19 @@ packages:
           require_ssl: "(( .properties.metrics_tls_disabled.value ? .properties.false_boolean.value : .properties.true_boolean.value ))"
           machines: "(( .properties.metrics_tls_disabled.value ? ..cf.etcd_server.ips : .properties.etcd_machines.parsed_strings ))"
           ca_cert: (( $ops_manager.ca_certificate ))
+      consul:
+        encrypt_keys:
+        - (( ..cf.properties.consul_encrypt_key.value ))
+        ca_cert: (( $ops_manager.ca_certificate ))
+        server_cert: (( ..cf.properties.consul_server_cert.cert_pem ))
+        server_key: (( ..cf.properties.consul_server_cert.private_key_pem ))
+        agent_cert: (( ..cf.properties.consul_agent_cert.cert_pem ))
+        agent_key: (( ..cf.properties.consul_agent_cert.private_key_pem ))
+        agent:
+          domain: cf.internal
+          mode: server
+          servers:
+            lan: (( ..cf.consul_server.ips ))
 - name: influxdb-nozzle-bosh-release
   type: bosh-release
   path: resources/influxdb-nozzle-bosh-release.tgz
