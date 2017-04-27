@@ -34,6 +34,8 @@ packages:
   jobs:
   - name: InfluxDB
     templates:
+    - name: consul_agent
+      release: consul
     - name: metron_agent
       release: loggregator
     - name: route_registrar
