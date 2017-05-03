@@ -131,6 +131,7 @@ packages:
           foundation: (( .properties.influxdb_nozzle_foundation.value ))
           batch_size: (( .properties.influxdb_nozzle_batch_size.value ))
           tag_fields: (( .properties.influxdb_nozzle_tag_fields.value ))
+          captured_events: (( .properties.influxdb_nozzle_captured_events.value ))
       buildpack: (( .properties.buildpack.value ))
       instances: (( .properties.instances.value ))
       security:
