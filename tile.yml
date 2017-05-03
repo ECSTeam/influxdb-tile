@@ -131,6 +131,7 @@ packages:
           foundation: (( .properties.influxdb_nozzle_foundation.value ))
           batch_size: (( .properties.influxdb_nozzle_batch_size.value ))
           tag_fields: (( .properties.influxdb_nozzle_tag_fields.value ))
+          captured_events: (( .properties.influxdb_nozzle_captured_events.value ))
       buildpack: (( .properties.buildpack.value ))
       instances: (( .properties.instances.value ))
       security:
@@ -246,6 +247,20 @@ forms:
     constraints:
       min: 1
       max: 500
+  - name: influxdb_nozzle_captured_events
+    type: multi_select_options
+    label: Event Types to Capture
+    description: Selected types will be sent to InfluxDB
+    default: ['COUNTER_EVENT', 'VALUE_METRIC', 'CONTAINER_METRIC', 'HTTP_START_STOP']
+    options:
+    - name: COUNTER_EVENT
+      label: CounterEvent
+    - name: VALUE_METRIC
+      label: ValueMetric
+    - name: CONTAINER_METRIC
+      label: ContainerMetric
+    - name: HTTP_START_STOP
+      label: HttpStartStop
   - name: influxdb_nozzle_tag_fields
     type: multi_select_options
     label: Fields to Tag
@@ -266,8 +281,6 @@ forms:
       description: Save the job's BOSH deployment (tile) as an InfluxDB tag
     - name: tags
       label: Custom Tags
-    - name: unit
-      label: Unit (Valid for ValueMetrics only)
 - name: metrics
   label: Metrics
   properties:
