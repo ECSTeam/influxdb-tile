@@ -281,8 +281,6 @@ forms:
       description: Save the job's BOSH deployment (tile) as an InfluxDB tag
     - name: tags
       label: Custom Tags
-    - name: unit
-      label: Unit (Valid for ValueMetrics only)
 - name: metrics
   label: Metrics
   properties:
